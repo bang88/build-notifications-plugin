@@ -61,7 +61,7 @@ public class TelegramNotifier extends BaseNotifier {
   @Override
   protected Message createMessage(String target, AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) {
     TelegramDescriptor descriptor = (TelegramDescriptor) getDescriptor();
-    return new TelegramMessage(descriptor.getBotToken(), target, replaceEnvString(build, getExtraMessage()));
+    return new TelegramMessage(descriptor.getBotToken(), replaceEnvString(build, target), replaceEnvString(build, getExtraMessage()));
   }
 
   /**
