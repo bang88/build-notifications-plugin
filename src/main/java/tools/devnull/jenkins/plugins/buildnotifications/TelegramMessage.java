@@ -75,8 +75,8 @@ public class TelegramMessage implements Message {
 
   @Override
   public void setUrl(String url, String title) {
-    this.url = url;
-    this.urlTitle = title;
+    this.url = ""; // url;
+    this.urlTitle = ""; // title;
   }
 
   @Override
