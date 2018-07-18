@@ -75,8 +75,8 @@ public class TelegramMessage implements Message {
 
   @Override
   public void setUrl(String url, String title) {
-    this.url = ""; // url;
-    this.urlTitle = ""; // title;
+    this.url = url;
+    this.urlTitle = title;
   }
 
   @Override
@@ -120,11 +120,11 @@ public class TelegramMessage implements Message {
 
   private String getMessage() {
     return String.format(
-        "%s%n%n%s%n%n%s <%s>%n%n%s",
+        "%s%n%n%s%n%n%s",
         title,
         content,
-        urlTitle,
-        url,
+//        urlTitle,
+//        url,
         extraMessage
     );
   }
