@@ -129,7 +129,7 @@ public class BuildNotifier {
             switch (status) {
                 case BROKEN:
                 case STILL_BROKEN:
-                    return String.join(", ", build.getLog(150));
+                    return String.join("\n", build.getLog(150));
 
             }
         }
