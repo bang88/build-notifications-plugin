@@ -41,95 +41,108 @@ import java.util.logging.Logger;
  */
 public class BuildNotifier {
 
-  private static final Logger LOGGER = Logger.getLogger(BuildNotifier.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(BuildNotifier.class.getName());
 
-  private final Message message;
-  private final AbstractBuild build;
-  private final BuildStatus status;
-  private final Result result;
-  private final String baseUrl;
+    private final Message message;
+    private final AbstractBuild build;
+    private final BuildStatus status;
+    private final Result result;
+    private final String baseUrl;
 
-  /**
-   * Constructs a new BuildNotifier based on the given objects
-   *
-   * @param message the message to populate and send
-   * @param build   the target build
-   */
-  public BuildNotifier(Message message, AbstractBuild build, String baseUrl) {
-    this.message = message;
-    this.build = build;
-    this.status = BuildStatus.of(build);
-    this.result = build.getResult();
-    this.baseUrl = baseUrl;
-  }
-
-  /**
-   * Sends the notification through the given message object.
-   */
-  public void sendNotification() {
-    LOGGER.info("Sending notification...");
-
-    setPriority();
-    setContent();
-    setTitle();
-    setUrl();
-
-    message.send();
-  }
-
-  private void setUrl() {
-    message.setUrl(String.format("%s%s", baseUrl, build.getUrl()), "Go to build");
-  }
-
-  private void setContent() {
-    if (build.getChangeSet().getItems().length == 0) {
-      message.setContent(this.getResultString());
-    } else {
-      StringBuilder changes = new StringBuilder();
-
-      for (Iterator<? extends ChangeLogSet.Entry> i = build.getChangeSet().iterator(); i.hasNext(); ) {
-        ChangeLogSet.Entry change = i.next();
-        changes.append("\n");
-        changes.append(change.getMsg());
-        changes.append(" - ");
-        changes.append(change.getAuthor());
-      }
-
-      message.setContent(String.format("%s%n%s", this.getResultString(), changes.toString()));
+    /**
+     * Constructs a new BuildNotifier based on the given objects
+     *
+     * @param message the message to populate and send
+     * @param build   the target build
+     */
+    public BuildNotifier(Message message, AbstractBuild build, String baseUrl) {
+        this.message = message;
+        this.build = build;
+        this.status = BuildStatus.of(build);
+        this.result = build.getResult();
+        this.baseUrl = baseUrl;
     }
-  }
 
-  private void setTitle() {
-    message.setTitle(String.format(
-        "%s - Build #%d of %s",
-        status.tag(),
-        build.getNumber(),
-        build.getProject().getName()
-    ));
-  }
+    /**
+     * Sends the notification through the given message object.
+     */
+    public void sendNotification() {
+        LOGGER.info("Sending notification...");
 
-  private void setPriority() {
-    switch (status) {
-      case FIXED:
-        message.normalPriority();
-        break;
-      case BROKEN:
-      case STILL_BROKEN:
-        message.highPriority();
-        break;
-      case SUCCESSFUL:
-        message.lowPriority();
-        break;
+        setPriority();
+        setContent();
+        setTitle();
+        setUrl();
+
+        message.send();
     }
-  }
 
-  private String getResultString(){
-    String result = (new NotifierSettings()).alternativeResult(this.result);
-    if(result != null && result.length() > 0){
-      return result;
-    }else{
-      return this.result.toString();
+    private void setUrl() {
+        message.setUrl(String.format("%s%s", baseUrl, build.getUrl()), "Go to build");
     }
-  }
+
+    private void setContent() {
+        if (build.getChangeSet().getItems().length == 0) {
+            message.setContent(this.getResultString());
+        } else {
+            StringBuilder changes = new StringBuilder();
+
+            for (Iterator<? extends ChangeLogSet.Entry> i = build.getChangeSet().iterator(); i.hasNext(); ) {
+                ChangeLogSet.Entry change = i.next();
+                changes.append("\n");
+                changes.append(change.getMsg());
+                changes.append(" - ");
+                changes.append(change.getAuthor());
+            }
+
+            message.setContent(String.format("%s%n%s", this.getResultString(), changes.toString()));
+        }
+    }
+
+    private void setTitle() {
+        message.setTitle(String.format(
+                "%s - Build #%d of %s",
+                status.tag(),
+                build.getNumber(),
+                build.getProject().getName()
+        ));
+    }
+
+    private void setPriority() {
+        switch (status) {
+            case FIXED:
+                message.normalPriority();
+                break;
+            case BROKEN:
+            case STILL_BROKEN:
+                message.highPriority();
+                break;
+            case SUCCESSFUL:
+                message.lowPriority();
+                break;
+        }
+    }
+
+    private String getResultString() {
+        try {
+            //  Block of code to try
+            switch (status) {
+                case BROKEN:
+                case STILL_BROKEN:
+                    return String.join(", ", build.getLog(150));
+
+            }
+        }
+        catch(Exception e) {
+            //  Block of code to handle errors
+        }
+
+        String result = (new NotifierSettings()).alternativeResult(this.result);
+        if (result != null && result.length() > 0) {
+            return result;
+        } else {
+            return this.result.toString();
+        }
+    }
 
 }
